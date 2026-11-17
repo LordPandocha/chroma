@@ -2,36 +2,36 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 const formats = [
   {
-    title: 'Лендинг', icon: 'panels', image: 'assets/landing.jpg',
+    title: 'Лендинг', note: 'Одна страница для одной услуги или продукта', icon: 'panels', image: 'assets/quiz-landing-v4.jpg',
     scopes: [
-      { title: 'Одна услуга', note: 'Описание, преимущества и контакты', price: 5000 },
-      { title: 'Расширенный лендинг', note: 'Кейсы, отзывы и дополнительные блоки', price: 10000 },
+      { title: 'Одна услуга', note: 'Описание, преимущества и контакты', price: 5900 },
+      { title: 'Расширенный лендинг', note: 'Кейсы, отзывы и дополнительные блоки', price: 8900 },
     ],
   },
   {
-    title: 'Сайт компании', icon: 'building', image: 'assets/company.jpg',
+    title: 'Сайт компании', note: 'Несколько страниц об услугах и компании', icon: 'building', image: 'assets/quiz-company-v4.jpg',
     scopes: [
-      { title: 'Основные страницы', note: 'Главная, услуги и контакты', price: 10000 },
-      { title: 'Сайт с разделами', note: 'Отдельные страницы услуг и кейсов', price: 15000 },
+      { title: 'Основные страницы', note: 'Главная, услуги и контакты', price: 10900 },
+      { title: 'Сайт с разделами', note: 'Отдельные страницы услуг и кейсов', price: 14600 },
     ],
   },
   {
-    title: 'Интернет-магазин', icon: 'bag', image: 'assets/shop.jpg',
+    title: 'Интернет-магазин', note: 'Каталог, карточки товаров и заказы', icon: 'bag', image: 'assets/quiz-shop-v4.jpg',
     scopes: [
-      { title: 'Каталог товаров', note: 'Карточки и заказ через мессенджер', price: 15000 },
-      { title: 'Магазин с корзиной', note: 'Корзина и оформление заказа', price: 20000 },
+      { title: 'Каталог товаров', note: 'Карточки и заказ через мессенджер', price: 16300 },
+      { title: 'Магазин с корзиной', note: 'Корзина и оформление заказа', price: 21900 },
     ],
   },
 ];
 
 const deadlines = [
-  { title: 'Как можно скорее', icon: 'bolt' },
-  { title: 'В течение месяца', icon: 'calendar' },
-  { title: 'Срок пока открыт', icon: 'clock' },
+  { title: 'В ближайшие 7 дней', icon: 'bolt', multiplier: 1.25 },
+  { title: 'В течение двух недель', icon: 'calendar', multiplier: 1.12 },
+  { title: 'Через месяц или позже', icon: 'clock', multiplier: 1 },
 ];
 
-const headings = ['Какой сайт нужен?', 'Что должно быть на сайте?', 'Когда нужен запуск?'];
-const answers = [null, null, null];
+const headings = ['Какой сайт нужен?', 'Что должно быть на сайте?', 'Есть ли тексты и фотографии?', 'Когда нужен запуск?'];
+const answers = Array(headings.length).fill(null);
 let step = 0;
 
 const panel = document.querySelector('#quiz-panel');
@@ -47,17 +47,12 @@ const price = document.querySelector('#result-price');
 const summary = document.querySelector('#result-summary');
 const contact = document.querySelector('#result-contact');
 const number = new Intl.NumberFormat('ru-RU');
-const estimate = document.querySelector('#quiz-estimate');
 const formatPrice = value => number.format(value) + ' ₽';
-
-function updateEstimate() {
-  const format = formats[answers[0]];
-  const scope = format?.scopes[answers[1]];
-  estimate.hidden = !format || step === headings.length;
-  estimate.textContent = scope
-    ? formatPrice(scope.price)
-    : format ? 'от ' + formatPrice(format.scopes[0].price) : '';
-}
+const contents = [
+  { title: 'Материалы готовы', note: 'У меня уже есть тексты и фото', fee: 0 },
+  { title: 'Нужна помощь с материалами', note: 'Помогите подготовить тексты и подобрать изображения', fee: 1900 },
+  { title: 'Пока не знаю', note: 'Обсудим, что нужно подготовить', fee: 0 },
+];
 
 title.tabIndex = -1;
 
@@ -94,11 +89,9 @@ function makeChoice(option, index) {
   const label = document.createElement('strong');
   label.textContent = option.title;
   caption.append(label);
-  const details = option.scopes ? ["от " + formatPrice(option.scopes[0].price)] : [option.note, option.price && formatPrice(option.price)];
-  for (const detail of details.filter(Boolean)) {
+  if (option.note) {
     const note = document.createElement('small');
-    note.textContent = detail;
-    if (detail.endsWith('₽')) note.classList.add('choice-price');
+    note.textContent = option.note;
     caption.append(note);
   }
   button.append(badge, check, caption);
@@ -107,7 +100,6 @@ function makeChoice(option, index) {
     answers[step] = index;
     for (const choice of choices.children) choice.setAttribute('aria-pressed', String(choice === button));
     next.disabled = false;
-    updateEstimate();
   });
   return button;
 }
@@ -115,8 +107,10 @@ function makeChoice(option, index) {
 function showResult() {
   const format = formats[answers[0]];
   const scope = format.scopes[answers[1]];
-  const total = formatPrice(scope.price);
-  const lines = [['Формат', format.title], ['Состав', scope.title], ['Срок', deadlines[answers[2]].title]];
+  const materials = contents[answers[2]];
+  const deadline = deadlines[answers[3]];
+  const total = formatPrice(Math.round((scope.price + materials.fee) * deadline.multiplier / 100) * 100);
+  const lines = [['Формат', format.title], ['Состав', scope.title], ['Материалы', materials.title], ['Срок', deadline.title]];
   price.textContent = total;
   summary.replaceChildren(...lines.map(([key, value]) => {
     const row = document.createElement('div');
@@ -139,7 +133,7 @@ function renderQuiz(focus = true) {
   result.hidden = !done;
   next.hidden = done;
   back.hidden = step === 0;
-  count.textContent = done ? 'Результат' : 'Шаг ' + (step + 1) + ' из 3';
+  count.textContent = done ? 'Результат' : 'Шаг ' + (step + 1) + ' из ' + headings.length;
   pips.forEach((pip, index) => {
     pip.classList.toggle('done', index < step);
     pip.classList.toggle('current', index === step);
@@ -149,19 +143,18 @@ function renderQuiz(focus = true) {
     showResult();
   } else {
     title.textContent = headings[step];
-    const options = [formats, formats[answers[0]]?.scopes, deadlines][step];
+    const options = [formats, formats[answers[0]]?.scopes, contents, deadlines][step];
     choices.replaceChildren(...options.map(makeChoice));
-    next.replaceChildren(step === 2 ? 'Узнать цену' : 'Далее', icon('arrow-right'));
+    next.replaceChildren(step === headings.length - 1 ? 'Узнать цену' : 'Далее', icon('arrow-right'));
     next.disabled = answers[step] === null;
   }
 
-  updateEstimate();
   const visiblePanel = done ? result : panel;
   if (focus) {
     visiblePanel.classList.remove('quiz-enter');
     void visiblePanel.offsetWidth;
     visiblePanel.classList.add('quiz-enter');
-    (done ? price : title).focus({ preventScroll: true });
+    (done ? price : title).focus();
   }
 }
 
@@ -180,18 +173,6 @@ back.addEventListener('click', () => {
 actions.hidden = false;
 renderQuiz(false);
 
-for (const link of document.querySelectorAll('[data-format]')) {
-  link.addEventListener('click', event => {
-    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-    const selected = Number(link.dataset.format);
-    answers[0] = selected;
-    answers[1] = null;
-    answers[2] = null;
-    step = 0;
-    renderQuiz(false);
-  });
-}
-
 const themeToggle = document.querySelector('#theme-toggle');
 const systemTheme = matchMedia('(prefers-color-scheme: dark)');
 const root = document.documentElement;
@@ -202,7 +183,7 @@ function syncTheme() {
   themeToggle.firstElementChild.textContent = dark ? '☀' : '☾';
   themeToggle.lastElementChild.textContent = dark ? 'Светлая тема' : 'Тёмная тема';
   for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
-    meta.content = dark ? '#100d19' : '#faf8ff';
+    meta.content = dark ? '#080808' : '#f2eaff';
   }
 }
 
@@ -239,142 +220,110 @@ reducedMotion.addEventListener('change', () => {
   if (reducedMotion.matches) flight?.cancel();
 });
 
-// The hero's light follows a slow orbit at rest and moves toward the pointer or a tap.
-for (const surface of document.querySelectorAll('[data-light]')) {
-  const canvas = surface.querySelector('canvas');
-  const context = canvas?.getContext('2d');
-  const hero = Boolean(context);
-  let width = 0;
-  let height = 0;
-  let density = 1;
-  let visible = true;
+// Flight path and plane geometry adapted from LordPandocha's route transition.
+const intro = document.querySelector('.intro');
+if (!reducedMotion.matches && !navigator.connection?.saveData) {
+  const trail = intro.querySelector('.intro-trail');
+  const aircraft = intro.querySelector('.intro-aircraft');
+  intro.classList.add('is-playing');
+  const length = trail.getTotalLength();
+  trail.style.strokeDasharray = String(length);
+  trail.style.strokeDashoffset = String(length);
+  const start = performance.now();
+
+  function animateIntro(now) {
+    if (reducedMotion.matches || document.hidden) {
+      intro.classList.remove('is-playing');
+      return;
+    }
+    const progress = Math.min((now - start) / 1050, 1);
+    const distance = length * progress * progress * (3 - 2 * progress);
+    const point = trail.getPointAtLength(distance);
+    const before = trail.getPointAtLength(Math.max(0, distance - 3));
+    const after = trail.getPointAtLength(Math.min(length, distance + 3));
+    const angle = Math.atan2(after.y - before.y, after.x - before.x) * 180 / Math.PI;
+    aircraft.setAttribute('transform', 'translate(' + point.x + ' ' + point.y + ') rotate(' + angle + ') scale(.85)');
+    aircraft.setAttribute('opacity', '1');
+    trail.style.strokeDashoffset = String(length - distance);
+    if (progress < 1) requestAnimationFrame(animateIntro);
+  }
+
+  intro.addEventListener('animationend', () => intro.classList.remove('is-playing'), { once: true });
+  requestAnimationFrame(animateIntro);
+}
+
+const dotsCanvas = document.querySelector('.ambient-dots');
+const dotsContext = dotsCanvas.getContext('2d');
+
+if (dotsContext) {
+  let particles = [];
+  let pointer = null;
   let frame = 0;
-  let point = null;
-  let tapUntil = 0;
-  let x = .68;
-  let y = .48;
-  let intensity = .28;
+  let density = 1;
+  let color = '';
+  const finePointer = matchMedia('(pointer: fine)');
 
-  function draw(time) {
-    const phase = time * .00041;
-    const centerX = width * (.66 + (x - .68) * .34);
-    const centerY = height * (.46 + (y - .48) * .29);
-    const radiusX = width * (width < 640 ? .52 : .38);
-    const radiusY = height * (width < 640 ? .22 : .30);
-
-    context.setTransform(density, 0, 0, density, 0, 0);
-    context.clearRect(0, 0, width, height);
-    for (let orbit = 0; orbit < 3; orbit++) {
-      const scale = 1 - orbit * .106;
-      const tilt = -.29 + orbit * .22;
-      context.beginPath();
-      context.ellipse(centerX, centerY, radiusX * scale, radiusY * scale, tilt, 0, Math.PI * 2);
-      context.lineWidth = 1;
-      context.strokeStyle = 'rgba(255,255,255,' + (.09 - orbit * .017 + intensity * .09) + ')';
-      context.stroke();
-
-      const angle = phase * (1 + orbit * .17) + orbit * 2.1;
-      const glintX = Math.cos(angle) * radiusX * scale;
-      const glintY = Math.sin(angle) * radiusY * scale;
-      const px = centerX + glintX * Math.cos(tilt) - glintY * Math.sin(tilt);
-      const py = centerY + glintX * Math.sin(tilt) + glintY * Math.cos(tilt);
-      const glow = context.createRadialGradient(px, py, 0, px, py, 28);
-      glow.addColorStop(0, '#ffffffa0');
-      glow.addColorStop(1, '#ffffff00');
-      context.fillStyle = glow;
-      context.fillRect(px - 28, py - 28, 56, 56);
-      context.fillStyle = '#fff';
-      context.beginPath();
-      context.arc(px, py, 1.65, 0, Math.PI * 2);
-      context.fill();
-    }
-  }
-
-  function start() {
-    if (!frame && visible && !document.hidden && !reducedMotion.matches) frame = requestAnimationFrame(animate);
-  }
-
-  function animate(time) {
+  function drawDots(now) {
     frame = 0;
-    if (!visible || document.hidden || reducedMotion.matches) return;
-    if (tapUntil && time > tapUntil) {
-      point = null;
-      tapUntil = 0;
+    dotsContext.clearRect(0, 0, dotsCanvas.width / density, dotsCanvas.height / density);
+    dotsContext.fillStyle = color;
+    const active = finePointer.matches && !reducedMotion.matches ? pointer : null;
+
+    for (const dot of particles) {
+      const dx = active ? dot.x - active.x : 0;
+      const dy = active ? dot.y - active.y : 0;
+      const distance = Math.hypot(dx, dy);
+      const influence = active ? Math.max(0, 1 - distance / 135) : 0;
+      if (reducedMotion.matches) {
+        dot.offsetX = 0;
+        dot.offsetY = 0;
+      } else {
+        dot.offsetX += (dx * influence * .32 - dot.offsetX) * .12;
+        dot.offsetY += (dy * influence * .32 - dot.offsetY) * .12;
+      }
+      const drift = reducedMotion.matches ? 0 : Math.sin(now * .00065 + dot.phase) * 4;
+      dotsContext.globalAlpha = dot.opacity + influence * .20;
+      dotsContext.beginPath();
+      dotsContext.arc(dot.x + dot.offsetX + drift, dot.y + dot.offsetY, dot.radius, 0, Math.PI * 2);
+      dotsContext.fill();
     }
-    const idleX = hero ? .68 + Math.sin(time * .00078) * .19 : .68;
-    const idleY = hero ? .47 + Math.cos(time * .00065) * .14 : .48;
-    const targetX = point?.x ?? idleX;
-    const targetY = point?.y ?? idleY;
-    const targetPower = point ? .81 : .28;
-    x += (targetX - x) * .12;
-    y += (targetY - y) * .12;
-    intensity += (targetPower - intensity) * .12;
-    surface.style.setProperty('--mx', (x * 100) + '%');
-    surface.style.setProperty('--my', (y * 100) + '%');
-    if (hero) {
-      surface.style.setProperty('--tx', ((x - .68) * 42) + 'px');
-      surface.style.setProperty('--ty', ((y - .48) * 28) + 'px');
-      surface.style.setProperty('--light', intensity);
-      draw(time);
-    }
-    const settling = Math.abs(targetX - x) + Math.abs(targetY - y) > .001;
-    if (hero || settling || tapUntil) start();
+
+    if (!reducedMotion.matches && !document.hidden) frame = requestAnimationFrame(drawDots);
   }
 
-  function reposition(event) {
-    const bounds = surface.getBoundingClientRect();
-    point = { x: (event.clientX - bounds.left) / bounds.width, y: (event.clientY - bounds.top) / bounds.height };
-    start();
+  function refreshDots() {
+    cancelAnimationFrame(frame);
+    color = getComputedStyle(dotsCanvas).color;
+    const { clientWidth: width, clientHeight: height } = dotsCanvas;
+    density = Math.min(devicePixelRatio || 1, 1.5);
+    dotsCanvas.width = Math.round(width * density);
+    dotsCanvas.height = Math.round(height * density);
+    dotsContext.setTransform(density, 0, 0, density, 0, 0);
+    const count = Math.min(115, Math.max(30, Math.round(width * height / 13000)));
+    particles = Array.from({ length: count }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      radius: .6 + Math.random() * 1.1,
+      opacity: .13 + Math.random() * .27,
+      phase: Math.random() * Math.PI * 2,
+      offsetX: 0,
+      offsetY: 0,
+    }));
+    drawDots(performance.now());
   }
 
-  surface.addEventListener('pointermove', event => {
-    if (!reducedMotion.matches && event.pointerType !== 'touch') {
-      tapUntil = 0;
-      reposition(event);
-    }
-  });
-  surface.addEventListener('pointerleave', event => {
-    if (event.pointerType !== 'touch') {
-      point = null;
-      tapUntil = 0;
-      start();
-    }
-  });
-  surface.addEventListener('pointerdown', event => {
-    if (!reducedMotion.matches && event.pointerType === 'touch') {
-      tapUntil = performance.now() + 1250;
-      reposition(event);
-    }
+  document.addEventListener('pointermove', event => {
+    if (event.pointerType === 'mouse') pointer = { x: event.clientX, y: event.clientY };
   }, { passive: true });
-
-  if (hero) {
-    const resize = new ResizeObserver(() => {
-      const bounds = surface.getBoundingClientRect();
-      width = bounds.width;
-      height = bounds.height;
-      density = Math.min(window.devicePixelRatio || 1, 1.5);
-      canvas.width = Math.round(width * density);
-      canvas.height = Math.round(height * density);
-      start();
-    });
-    resize.observe(surface);
-    const intersection = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-      start();
-    });
-    intersection.observe(surface);
-    document.addEventListener('visibilitychange', start);
-  }
-
-  reducedMotion.addEventListener('change', () => {
+  document.documentElement.addEventListener('pointerleave', () => { pointer = null; });
+  window.addEventListener('resize', refreshDots, { passive: true });
+  document.addEventListener('visibilitychange', () => {
     cancelAnimationFrame(frame);
     frame = 0;
-    point = null;
-    tapUntil = 0;
-    x = .68;
-    y = .48;
-    intensity = .28;
-    for (const property of ['--mx', '--my', '--tx', '--ty', '--light']) surface.style.removeProperty(property);
-    start();
+    if (!document.hidden) drawDots(performance.now());
   });
+  themeToggle.addEventListener('click', refreshDots);
+  systemTheme.addEventListener('change', refreshDots);
+  reducedMotion.addEventListener('change', refreshDots);
+  refreshDots();
 }
