@@ -2,21 +2,21 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 const formats = [
   {
-    title: 'Лендинг', note: 'от 5 000 ₽', icon: 'panels', image: 'assets/landing.jpg',
+    title: 'Лендинг', icon: 'panels', image: 'assets/landing.jpg',
     scopes: [
       { title: 'Одна услуга', note: 'Описание, преимущества и контакты', price: 5000 },
       { title: 'Расширенный лендинг', note: 'Кейсы, отзывы и дополнительные блоки', price: 10000 },
     ],
   },
   {
-    title: 'Сайт компании', note: 'от 10 000 ₽', icon: 'building', image: 'assets/company.jpg',
+    title: 'Сайт компании', icon: 'building', image: 'assets/company.jpg',
     scopes: [
       { title: 'Основные страницы', note: 'Главная, услуги и контакты', price: 10000 },
       { title: 'Сайт с разделами', note: 'Отдельные страницы услуг и кейсов', price: 15000 },
     ],
   },
   {
-    title: 'Интернет-магазин', note: 'от 15 000 ₽', icon: 'bag', image: 'assets/shop.jpg',
+    title: 'Интернет-магазин', icon: 'bag', image: 'assets/shop.jpg',
     scopes: [
       { title: 'Каталог товаров', note: 'Карточки и заказ через мессенджер', price: 15000 },
       { title: 'Магазин с корзиной', note: 'Корзина и оформление заказа', price: 20000 },
@@ -47,6 +47,17 @@ const price = document.querySelector('#result-price');
 const summary = document.querySelector('#result-summary');
 const contact = document.querySelector('#result-contact');
 const number = new Intl.NumberFormat('ru-RU');
+const estimate = document.querySelector('#quiz-estimate');
+const formatPrice = value => number.format(value) + ' ₽';
+
+function updateEstimate() {
+  const format = formats[answers[0]];
+  const scope = format?.scopes[answers[1]];
+  estimate.hidden = !format || step === headings.length;
+  estimate.textContent = scope
+    ? formatPrice(scope.price)
+    : format ? 'от ' + formatPrice(format.scopes[0].price) : '';
+}
 
 title.tabIndex = -1;
 
@@ -83,9 +94,11 @@ function makeChoice(option, index) {
   const label = document.createElement('strong');
   label.textContent = option.title;
   caption.append(label);
-  if (option.note) {
+  const details = option.scopes ? ["от " + formatPrice(option.scopes[0].price)] : [option.note, option.price && formatPrice(option.price)];
+  for (const detail of details.filter(Boolean)) {
     const note = document.createElement('small');
-    note.textContent = option.note;
+    note.textContent = detail;
+    if (detail.endsWith('₽')) note.classList.add('choice-price');
     caption.append(note);
   }
   button.append(badge, check, caption);
@@ -94,6 +107,7 @@ function makeChoice(option, index) {
     answers[step] = index;
     for (const choice of choices.children) choice.setAttribute('aria-pressed', String(choice === button));
     next.disabled = false;
+    updateEstimate();
   });
   return button;
 }
@@ -101,7 +115,7 @@ function makeChoice(option, index) {
 function showResult() {
   const format = formats[answers[0]];
   const scope = format.scopes[answers[1]];
-  const total = number.format(scope.price) + ' ₽';
+  const total = formatPrice(scope.price);
   const lines = [['Формат', format.title], ['Состав', scope.title], ['Срок', deadlines[answers[2]].title]];
   price.textContent = total;
   summary.replaceChildren(...lines.map(([key, value]) => {
@@ -141,12 +155,13 @@ function renderQuiz(focus = true) {
     next.disabled = answers[step] === null;
   }
 
+  updateEstimate();
   const visiblePanel = done ? result : panel;
   if (focus) {
     visiblePanel.classList.remove('quiz-enter');
     void visiblePanel.offsetWidth;
     visiblePanel.classList.add('quiz-enter');
-    (done ? price : title).focus();
+    (done ? price : title).focus({ preventScroll: true });
   }
 }
 
@@ -164,6 +179,65 @@ back.addEventListener('click', () => {
 });
 actions.hidden = false;
 renderQuiz(false);
+
+for (const link of document.querySelectorAll('[data-format]')) {
+  link.addEventListener('click', event => {
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    const selected = Number(link.dataset.format);
+    answers[0] = selected;
+    answers[1] = null;
+    answers[2] = null;
+    step = 0;
+    renderQuiz(false);
+  });
+}
+
+const themeToggle = document.querySelector('#theme-toggle');
+const systemTheme = matchMedia('(prefers-color-scheme: dark)');
+const root = document.documentElement;
+const currentTheme = () => root.dataset.theme || (systemTheme.matches ? 'dark' : 'light');
+
+function syncTheme() {
+  const dark = currentTheme() === 'dark';
+  themeToggle.firstElementChild.textContent = dark ? '☀' : '☾';
+  themeToggle.lastElementChild.textContent = dark ? 'Светлая тема' : 'Тёмная тема';
+  for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
+    meta.content = dark ? '#100d19' : '#faf8ff';
+  }
+}
+
+themeToggle.addEventListener('click', () => {
+  root.dataset.theme = currentTheme() === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem('chroma-theme', root.dataset.theme); } catch {}
+  syncTheme();
+});
+systemTheme.addEventListener('change', syncTheme);
+syncTheme();
+themeToggle.hidden = false;
+
+let flight;
+document.querySelector('.header').addEventListener('click', event => {
+  const link = event.target.closest('.nav a');
+  if (!link || reducedMotion.matches || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+  flight?.cancel();
+  const bounds = link.getBoundingClientRect();
+  const plane = icon('send');
+  plane.classList.add('nav-plane');
+  plane.style.left = bounds.left + bounds.width / 2 + 'px';
+  plane.style.top = bounds.bottom + 'px';
+  document.body.append(plane);
+  const drift = Math.min(115, (innerWidth - bounds.right) / 2);
+  flight = plane.animate([
+    { transform: 'translate(-50%, 0) rotate(35deg) scale(.65)', opacity: 0 },
+    { transform: 'translate(' + drift + 'px, 65px) rotate(75deg) scale(1.2)', opacity: 1, offset: .35 },
+    { transform: 'translate(15px, 175px) rotate(125deg) scale(.75)', opacity: 0 },
+  ], { duration: 650, easing: 'cubic-bezier(.24,.65,.25,1)' });
+  flight.finished.then(() => plane.remove(), () => plane.remove());
+});
+
+reducedMotion.addEventListener('change', () => {
+  if (reducedMotion.matches) flight?.cancel();
+});
 
 // The hero's light follows a slow orbit at rest and moves toward the pointer or a tap.
 for (const surface of document.querySelectorAll('[data-light]')) {

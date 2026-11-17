@@ -4,12 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="CHROMA — дизайн и разработка сайтов для бизнеса от 5 000 до 20 000 ₽">
-  <meta name="theme-color" content="#080808">
+  <meta name="theme-color" content="#100d19" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#faf8ff" media="(prefers-color-scheme: light)">
+  <link rel="canonical" href="https://lordpandocha.github.io/chroma/">
+  <script>
+    if (location.hostname === 'lordpandocha.github.io' && location.pathname === '/chroma') {
+      location.replace('/chroma/' + location.search + location.hash);
+    }
+    try {
+      const theme = localStorage.getItem('chroma-theme');
+      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    } catch {}
+  </script>
   <meta name="referrer" content="no-referrer">
   <title>CHROMA — сайты для бизнеса</title>
   <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=2">
-  <script src="app.js?v=2" defer></script>
+  <link rel="stylesheet" href="style.css?v=3">
+  <script src="app.js?v=3" defer></script>
 </head>
 <body>
   <svg class="sprites" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -29,8 +40,8 @@
 
   <header id="top" class="header wrap">
     <a class="brand" href="#top" aria-label="CHROMA — на главную"><img src="assets/mark.svg" width="30" height="30" alt=""> CHROMA</a>
-    <nav class="nav" aria-label="Разделы сайта"><a href="#quiz">Квиз и цены</a><a href="#works">Работы</a></nav>
-    <a class="button outline" href="https://t.me/LordPandocha" rel="noreferrer">Telegram <svg class="icon"><use href="#arrow-up"/></svg></a>
+    <nav class="nav" aria-label="Разделы сайта"><a href="#prices">Цены</a><a href="#works">Работы</a><a href="#about">О нас</a></nav>
+    <button id="theme-toggle" class="button outline" type="button" hidden><span aria-hidden="true">☾</span> <span>Тёмная тема</span></button>
   </header>
 
   <main>
@@ -41,9 +52,39 @@
         <p class="eyebrow"><span></span> Дизайн и разработка</p>
         <h1 id="hero-heading">Сайты<br><em>с характером</em></h1>
         <div class="hero-actions">
-          <a class="button primary" href="#quiz">Рассчитать сайт <svg class="icon"><use href="#arrow-right"/></svg></a>
+          <a class="button primary" href="#prices">Посмотреть цены <svg class="icon"><use href="#arrow-right"/></svg></a>
           <span class="hero-price">5 000–20 000 ₽</span>
         </div>
+      </div>
+    </section>
+
+    <section id="prices" class="prices wrap" aria-labelledby="prices-heading">
+      <div class="section-heading">
+        <h2 id="prices-heading">Цены</h2>
+        <p>Выберите формат и уточните состав сайта в квизе.</p>
+      </div>
+      <div class="price-grid">
+        <article class="price-card">
+          <svg class="icon" aria-hidden="true"><use href="#panels"/></svg>
+          <h3>Лендинг</h3>
+          <p class="package-price">от <strong>5 000 ₽</strong></p>
+          <p>Одна страница для услуги или продукта.</p>
+          <a class="button outline" href="#quiz" data-format="0">Выбрать лендинг <svg class="icon" aria-hidden="true"><use href="#arrow-right"/></svg></a>
+        </article>
+        <article class="price-card">
+          <svg class="icon" aria-hidden="true"><use href="#building"/></svg>
+          <h3>Сайт компании</h3>
+          <p class="package-price">от <strong>10 000 ₽</strong></p>
+          <p>Главная, услуги и контакты компании.</p>
+          <a class="button outline" href="#quiz" data-format="1">Выбрать сайт <svg class="icon" aria-hidden="true"><use href="#arrow-right"/></svg></a>
+        </article>
+        <article class="price-card">
+          <svg class="icon" aria-hidden="true"><use href="#bag"/></svg>
+          <h3>Интернет-магазин</h3>
+          <p class="package-price">от <strong>15 000 ₽</strong></p>
+          <p>Каталог с карточками и заказом через мессенджер.</p>
+          <a class="button outline" href="#quiz" data-format="2">Выбрать магазин <svg class="icon" aria-hidden="true"><use href="#arrow-right"/></svg></a>
+        </article>
       </div>
     </section>
 
@@ -71,6 +112,7 @@
         </div>
         <div id="quiz-actions" class="quiz-actions" hidden>
           <button id="quiz-back" class="button outline" type="button" hidden><svg class="icon"><use href="#arrow-left"/></svg> Назад</button>
+          <p class="quiz-estimate" id="quiz-estimate" aria-live="polite"></p>
           <button id="quiz-next" class="button primary" type="button" disabled>Далее <svg class="icon"><use href="#arrow-right"/></svg></button>
         </div>
       </div>
@@ -90,6 +132,15 @@
           <span class="work-arrow"><svg class="icon"><use href="#arrow-up"/></svg></span>
         </a>
       </div>
+    </section>
+    <section id="about" class="about wrap" aria-labelledby="about-heading">
+      <div>
+        <p class="eyebrow">CHROMA</p>
+        <h2 id="about-heading">О нас</h2>
+        <p>Проектируем и разрабатываем сайты для бизнеса. Поможем подобрать формат под задачу и собрать страницы, на которых клиентам легко разобраться в услугах и оставить заявку.</p>
+        <a class="button primary" href="https://t.me/LordPandocha" rel="noreferrer">Обсудить проект <svg class="icon" aria-hidden="true"><use href="#send"/></svg></a>
+      </div>
+      <svg class="about-plane" aria-hidden="true"><use href="#send"/></svg>
     </section>
   </main>
 
