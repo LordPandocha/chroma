@@ -30,6 +30,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 section[id] { scroll-margin-top: 20px; }
 
 .header { height: 76px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; border-bottom: 1px solid var(--line); }
+.brand img { filter: var(--art-filter, none); }
 .brand { display: inline-flex; align-items: center; justify-self: start; width: max-content; gap: 9px; font-size: 20px; font-weight: 800; letter-spacing: -.06em; }
 .nav { display: flex; gap: 32px; color: #c1c1c1; font-size: 14px; }
 .nav a:hover, .footer > a:last-child:hover { color: white; }
@@ -206,7 +207,7 @@ h1 em { background-image: linear-gradient(var(--text), var(--accent)); }
 .choice:hover { border-color: var(--accent); background: var(--surface-hover); }
 .choice[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent), 0 0 16px var(--glow); }
 .work-card { color: #fff; }
-.choice:not(.has-image) :is(.choice-icon, .choice-check) { color: var(--accent); background: var(--surface-hover); border-color: var(--line); }
+.choice :is(.choice-icon, .choice-check) { color: var(--accent); background: var(--surface-hover); border-color: var(--line); }
 .choice[aria-pressed="true"] .choice-check { background: var(--action); color: var(--on-action); }
 .choice:not(.has-image) .choice-caption small { color: var(--muted); }
 .quiz-actions { flex-wrap: wrap; }
