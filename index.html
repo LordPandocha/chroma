@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="CHROMA — дизайн и разработка сайтов для бизнеса">
-  <meta name="theme-color" content="#080808" media="(prefers-color-scheme: dark)">
-  <meta name="theme-color" content="#f2eaff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#080808">
+  <meta name="color-scheme" content="dark light">
   <link rel="canonical" href="https://lordpandocha.github.io/chroma/">
   <script>
     if (location.hostname === 'lordpandocha.github.io' && location.pathname === '/chroma') {
@@ -19,10 +19,12 @@
   <meta name="referrer" content="no-referrer">
   <title>CHROMA — сайты для бизнеса</title>
   <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=4">
-  <script src="app.js?v=4" defer></script>
+  <link rel="stylesheet" href="style.css?v=5">
+  <script src="pricing.js?v=5" defer></script>
+  <script src="app.js?v=5" defer></script>
 </head>
 <body>
+  <a class="skip-link" href="#quiz">Перейти к расчёту</a>
   <svg class="sprites" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <symbol id="arrow-up" viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10"/></symbol>
     <symbol id="arrow-right" viewBox="0 0 24 24"><path d="M5 12h14m-7-7 7 7-7 7"/></symbol>
@@ -38,17 +40,7 @@
     <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
   </svg>
 
-  <canvas class="ambient-dots" aria-hidden="true"></canvas>
-  <div class="intro" aria-hidden="true">
-    <span class="intro-brand">CHROMA</span>
-    <svg class="intro-map" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice">
-      <path class="intro-trail" d="M-80 460 C190 480 240 330 390 320 C520 310 575 420 490 455 C390 498 350 365 425 285 C505 200 585 250 615 320 C665 435 840 310 1080 105"/>
-      <g class="intro-aircraft" opacity="0">
-        <path d="M-26 -14 32 0-26 14-11 2Z"/>
-        <path d="M-11 2 32 0-26 14Z"/>
-      </g>
-    </svg>
-  </div>
+  <div class="starfield" aria-hidden="true"></div>
 
   <header id="top" class="header wrap">
     <a class="brand" href="#top" aria-label="CHROMA — на главную"><img src="assets/mark.svg" width="30" height="30" alt=""> CHROMA</a>
@@ -58,12 +50,14 @@
 
   <main>
     <section class="hero wrap" aria-labelledby="hero-heading">
-      <div class="hero-art" aria-hidden="true"><img src="assets/hero.jpg" alt="" fetchpriority="high"></div>
+      <div class="hero-art" aria-hidden="true"><picture data-art="hero"><source media="(max-width: 640px)" srcset="assets/hero-dark-480.webp"><img src="assets/hero-dark.webp" width="1536" height="1024" alt="" fetchpriority="high"></picture></div>
       <div class="hero-content">
         <p class="eyebrow"><span></span> Дизайн и разработка</p>
         <h1 id="hero-heading">Сайты<br><em>с характером</em></h1>
+        <p class="hero-description">Продуманный дизайн, понятная структура и удобство на каждом экране.</p>
         <div class="hero-actions">
           <a class="button primary" href="#quiz">Рассчитать сайт <svg class="icon"><use href="#arrow-right"/></svg></a>
+          <span class="hero-price">От 5 900 ₽ · 4 вопроса</span>
         </div>
       </div>
     </section>
@@ -85,15 +79,20 @@
         </div>
         <div id="quiz-result" class="quiz-result" hidden>
           <div class="result-body">
-            <div><p class="eyebrow">Ориентир по стоимости</p><h3 id="result-price" tabindex="-1"></h3><p class="result-note">Точную стоимость подтвердим после обсуждения проекта.</p></div>
+            <div><p class="eyebrow">Ориентировочная стоимость</p><h3 id="result-price" tabindex="-1"></h3><p class="result-note">Стоимость и срок подтвердим после обсуждения. Домены, хостинг, платные сервисы и нестандартные интеграции рассчитываются отдельно.</p></div>
             <dl id="result-summary"></dl>
           </div>
           <a id="result-contact" class="button primary" href="https://t.me/LordPandocha" rel="noreferrer">Обсудить в Telegram <svg class="icon"><use href="#send"/></svg></a>
         </div>
+        <div class="quiz-bottom">
+          <p id="live-estimate" role="status" aria-live="polite">5 900–25 000 ₽ · ориентировочно</p>
         <div id="quiz-actions" class="quiz-actions" hidden>
+          <button id="quiz-restart" class="button outline" type="button" hidden>Начать заново</button>
           <button id="quiz-back" class="button outline" type="button" hidden><svg class="icon"><use href="#arrow-left"/></svg> Назад</button>
           <button id="quiz-next" class="button primary" type="button" disabled>Далее <svg class="icon"><use href="#arrow-right"/></svg></button>
         </div>
+        </div>
+        <p id="quiz-help" class="quiz-help">Иллюстрации показывают примеры. Дизайн создадим под ваш бизнес. Все варианты включают адаптацию для телефона.</p>
       </div>
     </section>
 
@@ -101,14 +100,12 @@
       <h2 id="works-heading">Работы</h2>
       <div class="works-grid">
         <a class="work-card" href="https://whiteglow.ru/" rel="noreferrer">
-          <img src="assets/whiteglow.jpg" alt="" loading="lazy">
+          <span class="work-image"><img src="assets/whiteglow.jpg" width="1280" height="800" alt="Проект WhiteGlow" loading="lazy" decoding="async"><span class="work-arrow"><svg class="icon"><use href="#arrow-up"/></svg></span></span>
           <span class="work-label"><strong>WhiteGlow</strong><small>Образовательный сайт</small></span>
-          <span class="work-arrow"><svg class="icon"><use href="#arrow-up"/></svg></span>
         </a>
         <a class="work-card" href="https://chistodoma86.ru/" rel="noreferrer">
-          <img src="assets/chistodoma.webp" alt="" loading="lazy">
+          <span class="work-image"><img src="assets/chistodoma.webp" width="1280" height="800" alt="Проект ChistoDoma" loading="lazy" decoding="async"><span class="work-arrow"><svg class="icon"><use href="#arrow-up"/></svg></span></span>
           <span class="work-label"><strong>ChistoDoma</strong><small>Сайт услуг</small></span>
-          <span class="work-arrow"><svg class="icon"><use href="#arrow-up"/></svg></span>
         </a>
       </div>
     </section>
@@ -126,6 +123,7 @@
 
   <footer class="footer wrap">
     <a class="brand" href="#top" aria-label="CHROMA — наверх"><img src="assets/mark.svg" width="26" height="26" alt=""> CHROMA</a>
+    <button id="motion-toggle" class="motion-toggle" type="button" aria-pressed="false">Остановить анимацию</button>
     <a href="https://t.me/LordPandocha" rel="noreferrer">@LordPandocha <svg class="icon"><use href="#arrow-up"/></svg></a>
   </footer>
 </body>
