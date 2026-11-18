@@ -130,9 +130,9 @@ h2{font-size:clamp(33px,4.1vw,60px);line-height:1.05;letter-spacing:-.065em}
 .star-bright{opacity:.8;box-shadow:0 0 10px 2px #ffffff40}
 .star-bright::before,.star-bright::after{content:'';position:absolute;inset:-4px 1px;background:linear-gradient(transparent,var(--dot),transparent)}
 .star-bright::after{transform:rotate(90deg)}
-.shooting-star{position:absolute;width:100px;height:1px;background:linear-gradient(90deg,transparent,#fff);opacity:0;box-shadow:0 0 7px #ffffff66;animation:shoot 13s linear infinite;transform:rotate(-28deg)}
+.shooting-star{position:absolute;width:140px;height:1px;background:linear-gradient(90deg,transparent,#fff);opacity:0;box-shadow:0 0 7px #ffffff66;animation:shoot 12s linear infinite;transform:rotate(-28deg)}
 @keyframes star-drift{from{transform:translate3d(0,0,0);opacity:.25}to{transform:translate3d(-14px,10px,0);opacity:.75}}
-@keyframes shoot{0%,82%{opacity:0;transform:rotate(-28deg) translateX(0)}84%{opacity:.9}94%,100%{opacity:0;transform:rotate(-28deg) translateX(320px)}}
+@keyframes shoot{0%,82%{opacity:0;transform:rotate(-28deg) translateX(0)}84%{opacity:.9}94%,100%{opacity:0;transform:rotate(-28deg) translateX(430px)}}
 :root[data-theme="light"] .starfield{opacity:.3}
 :root[data-theme="light"] .shooting-star{display:none}
 .motion-paused .star,.motion-paused .shooting-star,.motion-stopped .star,.motion-stopped .shooting-star{animation-play-state:paused}
@@ -197,7 +197,7 @@ h2{font-size:clamp(33px,4.1vw,60px);line-height:1.05;letter-spacing:-.065em}
   .work-label{padding:16px}.work-label small{font-size:12px}
   .footer{gap:10px}.footer .brand{font-size:18px}
   .motion-toggle{order:3;flex-basis:100%;text-align:left}
-  .star{animation:none}.star:nth-child(n+19){display:none}.shooting-star{display:none}
+  .star:nth-child(n+23){display:none}.star{animation-duration:20s!important}.shooting-star{display:none}
 }
 @media(max-width:359px){
   .wrap{width:calc(100% - 24px)}

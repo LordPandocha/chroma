@@ -76,13 +76,6 @@ function syncImages() {
   let entrance;
   title.tabIndex = -1;
 
-  function updateEstimate() {
-    if (answers[0] === null) { estimate.textContent = '5 900–25 000 ₽ · ориентировочно'; return; }
-    const scope = formats[answers[0]].scopes[answers[1] ?? 0];
-    const total = scope.price + (contents[answers[2]]?.fee || 0) + (deadlines[answers[3]]?.fee || 0);
-    estimate.textContent = (answers[1] === null ? 'От ' : '') + money(total) + ' · ориентировочно';
-  }
-
   function makeChoice(option, index) {
     const button = document.createElement('button');
     button.type = 'button';
@@ -132,17 +125,13 @@ function syncImages() {
       });
       caption.append(features);
     }
-    const amount = document.createElement('span');
-    amount.className = 'choice-price';
-    amount.textContent = step === 0 ? 'от ' + money(option.scopes[0].price) : step === 1 ? money(option.price) : option.fee ? '+ ' + money(option.fee) : 'Без доплаты';
-    caption.append(amount);
     button.append(check, caption);
     button.addEventListener('click', () => {
       if (step === 0 && answers[0] !== index) answers[1] = null;
       answers[step] = index;
       for (const choice of choices.children) choice.setAttribute('aria-pressed', String(choice === button));
       next.disabled = false;
-      updateEstimate();
+
     });
     return button;
   }
@@ -195,7 +184,7 @@ function syncImages() {
       next.replaceChildren(step === 3 ? 'Узнать цену' : 'Далее', icon('arrow-right'));
       next.disabled = answers[step] === null;
     }
-    updateEstimate();
+
     entrance?.cancel();
     if (focus) {
       const visiblePanel = done ? result : panel;
@@ -218,22 +207,22 @@ function syncImages() {
 (() => {
   const sky = document.querySelector('.starfield');
   const fragment = document.createDocumentFragment();
-  for (let i = 0; i < 42; i++) {
+  for (let i = 0; i < 58; i++) {
     const star = document.createElement('i');
     star.className = 'star' + (i % 8 === 0 ? ' star-bright' : '');
     star.style.left = ((i * 61.8 + 7) % 100) + '%';
     star.style.top = ((i * 37.3 + 11) % 100) + '%';
-    star.style.setProperty('--size', (i % 8 === 0 ? 3 : 1 + i % 3 * .4) + 'px');
+    star.style.setProperty('--size', (i % 8 === 0 ? 3.8 : 1.3 + i % 3 * .5) + 'px');
     star.style.animationDelay = -(i % 13) + 's';
     star.style.animationDuration = 7 + i % 9 + 's';
     fragment.append(star);
   }
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 4; i++) {
     const shooting = document.createElement('i');
     shooting.className = 'shooting-star';
-    shooting.style.left = 18 + i * 29 + '%';
-    shooting.style.top = 12 + i * 22 + '%';
-    shooting.style.animationDelay = i * 4.2 + 's';
+    shooting.style.left = 12 + i * 23 + '%';
+    shooting.style.top = 9 + i * 18 + '%';
+    shooting.style.animationDelay = i * 3.1 + 's';
     fragment.append(shooting);
   }
   sky.append(fragment);
